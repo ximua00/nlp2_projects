@@ -9,7 +9,6 @@ from DataLoader import DataLoader
 
 PARAMETERS_PATH = "./models/IBM1/"
 
-
 class IBM1:
     def __init__(self, english_data_path, french_data_path):
         self.training_data = DataLoader(english_data_path, french_data_path)
@@ -20,7 +19,7 @@ class IBM1:
         return defaultdict(lambda: defaultdict(lambda: unif_value))
 
     def train(self, epsilon = 10e-5):
-        for iteration in tqdm(range(10)):
+        for iteration in tqdm(range(1)):
             tcount = defaultdict(lambda: defaultdict(float))
             total = defaultdict(float)
             for e_sentence,f_sentence in tqdm(self.training_data.generate_sentence_pairs()):    
@@ -30,11 +29,11 @@ class IBM1:
                         denom_c += self.prob[e_word][f_word] * f_sentence.count(f_word)
                     for e_word in set(e_sentence):
                         weight = (self.prob[e_word][f_word] * f_sentence.count(f_word) * e_sentence.count(e_word)) / denom_c
-                        tcount[f_word][e_word] += weight                                                
+                        tcount[e_word][f_word] += weight                                                
                         total[e_word] += weight
-            for e_word, e_tot in total.items():
-                for f_word in self.training_data.french_vocab:
-                    self.prob[e_word][f_word] = tcount[f_word][e_word] / e_tot
+            for e_word in tqdm(tcount.keys()):
+                for f_word in tcount[e_word].keys():
+                    self.prob[e_word][f_word] = tcount[e_word][f_word] / total[e_word]
             self.save_checkpoint(iteration)
 
     def save_checkpoint(self, iteration):
@@ -50,9 +49,8 @@ class IBM1:
     
 
 if __name__ == "__main__":
-    english_data_path = "./training/hansards_test.36.2.e"
-    french_data_path = "./training/hansards_test.36.2.f"
+    english_data_path = "./training/hansards.36.2.e"
+    french_data_path = "./training/hansards.36.2.f"
     ibm1 = IBM1(english_data_path, french_data_path)
-    #ibm1.train()
+    ibm1.train()
     ibm1.load_checkpoint()
-    
