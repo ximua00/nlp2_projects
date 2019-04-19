@@ -1,0 +1,43 @@
+from collections import defaultdict
+from pprint import pprint
+from tqdm import tqdm
+import copy
+
+from DataLoader import DataLoader
+
+PARAMETERS_PATH = "./models/IBM1/"
+
+
+class IBM1:
+    def __init__(self, english_data_path, french_data_path):
+        self.training_data = DataLoader(english_data_path, french_data_path)
+        self.prob = self.uniform_initialisation()
+    
+    def uniform_initialisation(self):
+        unif_value = 1/self.training_data.n_english_vocab
+        return defaultdict(lambda: defaultdict(lambda: unif_value))
+
+    def train(self, epsilon = 10e-5):
+        for iteration in tqdm(range(10)):
+            tcount = defaultdict(lambda: defaultdict(float))
+            total = defaultdict(float)
+            for e_sentence,f_sentence in tqdm(self.training_data.generate_sentence_pairs()):                       
+                for f_word in set(f_sentence):
+                    denom_c = 0
+                    for e_word in set(e_sentence):
+                        denom_c += self.prob[e_word][f_word] * f_sentence.count(f_word)
+                    for e_word in set(e_sentence):
+                        weight = (self.prob[e_word][f_word] * f_sentence.count(f_word) * e_sentence.count(e_word)) / denom_c
+                        tcount[f_word][e_word] += weight                                                
+                        total[e_word] += weight
+            for e_word, e_tot in total.items():
+                for f_word in self.training_data.french_vocab:
+                    self.prob[e_word][f_word] = tcount[f_word][e_word] / e_tot
+
+
+
+if __name__ == "__main__":
+    english_data_path = "./training/hansards.36.2.e"
+    french_data_path = "./training/hansards.36.2.f"
+    ibm1 = IBM1(english_data_path, french_data_path)
+    ibm1.train()
