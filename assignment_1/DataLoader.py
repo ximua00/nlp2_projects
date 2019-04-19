@@ -12,7 +12,6 @@ class DataLoader:
         self.n_french_vocab += 1
 
     def preprocess(self, sentence):
-        # output = sentence[:-2] # remove /n character
         output = sentence
         output = output.lower()
         return output.split()
@@ -37,7 +36,7 @@ if __name__ == "__main__":
     french_data_path = "./training/hansards_test.36.2.f"
 
     data = DataLoader(english_data_path, french_data_path)
-    print(data.english_vocab)
+    print(data.n_english_vocab)
     # max_idx = 10
     # for idx, pair in enumerate(data.generate_sentence_pairs()):
     #     if idx > max_idx:

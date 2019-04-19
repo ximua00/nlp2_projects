@@ -22,7 +22,7 @@ class IBM1:
         for iteration in tqdm(range(10)):
             tcount = defaultdict(lambda: defaultdict(float))
             total = defaultdict(float)
-            for e_sentence,f_sentence in tqdm(self.training_data.generate_sentence_pairs()):                       
+            for e_sentence,f_sentence in tqdm(self.training_data.generate_sentence_pairs()):    
                 for f_word in set(f_sentence):
                     denom_c = 0
                     for e_word in set(e_sentence):
@@ -45,14 +45,12 @@ class IBM1:
         model_path = self.training_data.english_data_path.split("/")[2]
         with open(PARAMETERS_PATH + 'probs_{}'.format(model_path) + '.pkl', 'rb') as f:
             self.prob = dill.load(f)
-        pprint(self.prob["york"])
     
 
 if __name__ == "__main__":
     english_data_path = "./training/hansards_test.36.2.e"
     french_data_path = "./training/hansards_test.36.2.f"
     ibm1 = IBM1(english_data_path, french_data_path)
-    
-    #ibm1.train()
-    ibm1.load_parameters()
+    ibm1.train()
+    # ibm1.load_parameters()
     
