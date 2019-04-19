@@ -2,6 +2,8 @@ from collections import defaultdict
 
 class DataLoader:
     def __init__(self, english_data_path, french_data_path):
+        self.english_data_path = english_data_path
+        self.french_data_path = french_data_path
         self.english_data = open(english_data_path, "r").readlines()
         self.french_data = open(french_data_path, "r").readlines()
         self.n_english_vocab, self.english_vocab = self.vocabulary(self.english_data)

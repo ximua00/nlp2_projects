@@ -2,6 +2,7 @@ from collections import defaultdict
 from pprint import pprint
 from tqdm import tqdm
 import copy
+import dill
 
 from DataLoader import DataLoader
 
@@ -33,11 +34,25 @@ class IBM1:
             for e_word, e_tot in total.items():
                 for f_word in self.training_data.french_vocab:
                     self.prob[e_word][f_word] = tcount[f_word][e_word] / e_tot
+        self.save_parameters()
 
+    def save_parameters(self):
+        model_path = self.training_data.english_data_path.split("/")[2]
+        with open(PARAMETERS_PATH + 'probs_{}'.format(model_path) + '.pkl', 'wb') as f:
+            dill.dump(self.prob, f)
 
+    def load_parameters(self):
+        model_path = self.training_data.english_data_path.split("/")[2]
+        with open(PARAMETERS_PATH + 'probs_{}'.format(model_path) + '.pkl', 'rb') as f:
+            self.prob = dill.load(f)
+        pprint(self.prob["york"])
+    
 
 if __name__ == "__main__":
-    english_data_path = "./training/hansards.36.2.e"
-    french_data_path = "./training/hansards.36.2.f"
+    english_data_path = "./training/hansards_test.36.2.e"
+    french_data_path = "./training/hansards_test.36.2.f"
     ibm1 = IBM1(english_data_path, french_data_path)
-    ibm1.train()
+    
+    #ibm1.train()
+    ibm1.load_parameters()
+    
