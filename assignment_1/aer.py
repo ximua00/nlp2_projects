@@ -4,6 +4,7 @@ Check the test function below for an example of how to use these helper function
 
 For test results, please use the official AER perl script.
 """
+from pprint import pprint
 
 def read_naacl_alignments(path):
     """
@@ -82,8 +83,7 @@ def test(path, pred_path):
     # 1. Read in gold alignments
     gold_sets = read_naacl_alignments(path)
 
-    # 2. Here you would have the predictions of your own algorithm, 
-    #  for the sake of the illustration, I will cheat and make some predictions by corrupting 50% of sure gold alignments
+    # 2. Here you would have the predictions of your own algorithm.
     predictions = read_naacl_alignments(pred_path)
 
     # 3. Compute AER
@@ -92,7 +92,7 @@ def test(path, pred_path):
     metric = AERSufficientStatistics()
     # then we iterate over the corpus 
     for gold, pred in zip(gold_sets, predictions):
-        metric.update(sure=gold[0], probable=gold[1], predicted=pred)
+        metric.update(sure=gold[0], probable=gold[1], predicted=pred[1])
 
     # AER
     return metric.aer()
