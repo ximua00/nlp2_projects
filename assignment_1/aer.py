@@ -78,20 +78,13 @@ class AERSufficientStatistics:
         return 1 - (self.a_and_s + self.a_and_p) / (self.a + self.s)
 
 
-def test(path):
-    from random import random
+def test(path, pred_path):
     # 1. Read in gold alignments
     gold_sets = read_naacl_alignments(path)
 
     # 2. Here you would have the predictions of your own algorithm, 
     #  for the sake of the illustration, I will cheat and make some predictions by corrupting 50% of sure gold alignments
-    predictions = []
-    for s, p in gold_sets:
-        links = set()
-        for link in s:
-            if random() < 0.5:
-                links.add(link)
-        predictions.append(links)
+    predictions = read_naacl_alignments(pred_path)
 
     # 3. Compute AER
 
@@ -100,8 +93,9 @@ def test(path):
     # then we iterate over the corpus 
     for gold, pred in zip(gold_sets, predictions):
         metric.update(sure=gold[0], probable=gold[1], predicted=pred)
+
     # AER
-    print(metric.aer())
+    return metric.aer()
 
 
 if __name__ == '__main__':
