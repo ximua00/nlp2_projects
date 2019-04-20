@@ -6,10 +6,7 @@ class DataLoader:
         self.french_data_path = french_data_path
         self.english_data = open(english_data_path, "r").readlines()
         self.french_data = open(french_data_path, "r").readlines()
-        self.n_english_vocab, self.english_vocab = self.vocabulary(self.english_data)
-        self.n_french_vocab, self.french_vocab = self.vocabulary(self.french_data)
-        self.french_vocab.append("NULL")
-        self.n_french_vocab += 1
+        self.n_english_vocab =  self.vocabulary(self.english_data)
 
     def preprocess(self, sentence):
         output = sentence
@@ -28,7 +25,7 @@ class DataLoader:
         for sentence in languange_data:
             for word in self.preprocess(sentence):
                 vocab[word] += 1
-        return len(vocab), list(vocab.keys())
+        return len(vocab)
 
 
 if __name__ == "__main__":

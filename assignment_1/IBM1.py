@@ -1,7 +1,6 @@
 from collections import defaultdict
 from pprint import pprint
 from tqdm import tqdm
-import copy
 import dill
 import os
 
@@ -22,7 +21,7 @@ class IBM1:
         for iteration in tqdm(range(1)):
             tcount = defaultdict(lambda: defaultdict(float))
             total = defaultdict(float)
-            for e_sentence,f_sentence in tqdm(self.training_data.generate_sentence_pairs()):    
+            for e_sentence,f_sentence in self.training_data.generate_sentence_pairs():    
                 for f_word in set(f_sentence):
                     denom_c = 0
                     for e_word in set(e_sentence):
@@ -31,7 +30,7 @@ class IBM1:
                         weight = (self.prob[e_word][f_word] * f_sentence.count(f_word) * e_sentence.count(e_word)) / denom_c
                         tcount[e_word][f_word] += weight                                                
                         total[e_word] += weight
-            for e_word in tqdm(tcount.keys()):
+            for e_word in tcount.keys():
                 for f_word in tcount[e_word].keys():
                     self.prob[e_word][f_word] = tcount[e_word][f_word] / total[e_word]
             self.save_checkpoint(iteration)
@@ -46,11 +45,12 @@ class IBM1:
         latest_checkpoint = sorted(all_checkpoints)[-1]
         with open(PARAMETERS_PATH + latest_checkpoint, 'rb') as f:
             self.prob = dill.load(f)
-    
+
 
 if __name__ == "__main__":
     english_data_path = "./training/hansards.36.2.e"
     french_data_path = "./training/hansards.36.2.f"
     ibm1 = IBM1(english_data_path, french_data_path)
-    ibm1.train()
+    # ibm1.train()
     ibm1.load_checkpoint()
+    pprint(ibm1.prob)
