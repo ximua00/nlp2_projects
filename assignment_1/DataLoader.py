@@ -2,6 +2,8 @@ from collections import defaultdict
 
 class DataLoader:
     def __init__(self, source_data_path, target_data_path):
+        self.source_data_path = source_data_path
+        self.target_data_path = target_data_path
         self.source_data = open(source_data_path, "r").readlines()
         self.target_data = open(target_data_path, "r").readlines()
         self.n_source_vocab =  self.vocabulary(self.source_data)

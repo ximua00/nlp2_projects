@@ -3,7 +3,6 @@ import dill
 import os
 
 from pprint import pprint
-from tqdm import tqdm
 from math import log
 from matplotlib import pyplot as plt
 
@@ -27,7 +26,7 @@ class IBM1:
     def train(self, num_iterations = 10):
         aers = []
         log_likelihoods = []
-        for iteration in tqdm(range(num_iterations)):
+        for iteration in range(num_iterations):
             self.em_iteration()
             self.save_checkpoint(iteration)
             self.write_prediction(iteration)
