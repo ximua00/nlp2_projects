@@ -1,8 +1,11 @@
 from collections import defaultdict
-from pprint import pprint
-from tqdm import tqdm
 import dill
 import os
+
+from pprint import pprint
+from tqdm import tqdm
+from math import log
+from matplotlib import pyplot as plt
 
 from DataLoader import DataLoader
 from aer import test
@@ -21,11 +24,15 @@ class IBM1:
         return defaultdict(lambda: defaultdict(lambda: unif_value))
 
     def train(self, num_iterations = 10):
+        aers = []
+        log_likelihoods = []
         for iteration in tqdm(range(num_iterations)):
             self.em_iteration()
-            self.write_prediction(iteration)
-            self.evaluate(iteration)
             self.save_checkpoint(iteration)
+            self.write_prediction(iteration)
+            aer, log_likelihood = self.evaluate(iteration)
+            aers.append(aer)
+            log_likelihoods.append(log_likelihood)
 
     def em_iteration(self):
         tcount = defaultdict(lambda: defaultdict(float))
@@ -59,14 +66,18 @@ class IBM1:
         for sentence_idx, (s_sentence,t_sentence) in enumerate(self.evaluation_data.generate_sentence_pairs()):
             alignments = self.viterbi_alignment(s_sentence, t_sentence)            
             for s_align, t_align in alignments:
-                f.write("{} {} {} {} \n".format(sentence_idx+1, s_align+1, t_align, "S")) 
+                f.write("{} {} {} {} \n".format(sentence_idx+1, t_align+1, s_align, "S")) 
                 # TODO: wtf is S/P
         f.close()
 
     def evaluate(self, iteration):
         aer = test("./validation/dev.wa.nonullalign", PREDICTIONS_PATH + "eval_prediction_{}.txt".format(iteration))
-        print(aer)
-        return aer
+        log_likelihood = 0
+        for sentence_idx, (s_sentence,t_sentence) in enumerate(self.evaluation_data.generate_sentence_pairs()):
+            log_likelihood += self.calculate_log_likelihood(s_sentence, t_sentence)
+        print("AER:", aer)
+        print("Log-Likelihood:", log_likelihood)
+        #return aer, log_likelihood
 
     def viterbi_alignment(self, source_sentence, target_sentence):
         sentence_alignment = []
@@ -78,8 +89,15 @@ class IBM1:
                 if probability > max_s_prob:
                     max_s_prob = probability
                     max_s_idx = s_idx
-            sentence_alignment.append((t_idx, max_s_idx)) #TODO: check this or switch
+            sentence_alignment.append((max_s_idx, t_idx))
         return sentence_alignment
+
+    def calculate_log_likelihood(self, source_sentence, target_sentence):
+        alignments = self.viterbi_alignment(source_sentence, target_sentence)
+        log_likelihood = 0
+        for s_idx, t_idx in alignments:
+            log_likelihood += log(self.prob[source_sentence[s_idx]][target_sentence[t_idx]])
+        return log_likelihood
 
 
 if __name__ == "__main__":
