@@ -12,6 +12,7 @@ from aer import test
 
 PARAMETERS_PATH = "./models/IBM1/"
 PREDICTIONS_PATH = "./predictions/IBM1/"
+PLOTS_PATH = "./plots/IBM1/"
 
 class IBM1:
     def __init__(self, source_train_path, target_train_path, source_eval_path, target_eval_path):
@@ -33,6 +34,7 @@ class IBM1:
             aer, log_likelihood = self.evaluate(iteration)
             aers.append(aer)
             log_likelihoods.append(log_likelihood)
+        self.plot_results(aers, log_likelihoods)
 
     def em_iteration(self):
         tcount = defaultdict(lambda: defaultdict(float))
@@ -77,7 +79,7 @@ class IBM1:
             log_likelihood += self.calculate_log_likelihood(s_sentence, t_sentence)
         print("AER:", aer)
         print("Log-Likelihood:", log_likelihood)
-        #return aer, log_likelihood
+        return aer, log_likelihood
 
     def viterbi_alignment(self, source_sentence, target_sentence):
         sentence_alignment = []
@@ -98,6 +100,15 @@ class IBM1:
         for s_idx, t_idx in alignments:
             log_likelihood += log(self.prob[source_sentence[s_idx]][target_sentence[t_idx]])
         return log_likelihood
+
+    def plot_results(self, aers, log_likelihoods):
+        plt.plot(aers, label = "AER")
+        plt.legend()
+        plt.savefig(PLOTS_PATH + "AER.eps")
+        plt.close()
+        plt.plot(log_likelihoods, label = "log_likelihood")
+        plt.legend()
+        plt.savefig(PLOTS_PATH + "log_likelihood.eps")
 
 
 if __name__ == "__main__":
