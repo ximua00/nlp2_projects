@@ -1,7 +1,6 @@
 from collections import defaultdict
 import dill
 import os
-
 from pprint import pprint
 from math import log
 from matplotlib import pyplot as plt
@@ -10,10 +9,11 @@ from DataLoader import DataLoader
 from aer import test
 
 PARAMETERS_PATH = "./models/IBM1/"
+TEMP_PATH = "./models/IBM1/predict/"
 PREDICTIONS_PATH = "./predictions/IBM1/"
 TEST_PATH = "./testing/eval/"
 PLOTS_PATH = "./plots/IBM1/"
-EXPERIMENT_NAME = "baseline_E_to_F"
+EXPERIMENT_NAME = "Lowercase_E_F"
 
 class IBM1:
     def __init__(self, source_train_path, target_train_path, source_eval_path, target_eval_path, source_test_path, target_test_path):
@@ -60,10 +60,10 @@ class IBM1:
             dill.dump(self.prob, f)
 
     def load_checkpoint(self):
-        all_checkpoints = os.listdir(PARAMETERS_PATH)
+        all_checkpoints = os.listdir(TEMP_PATH)
         latest_checkpoint = sorted(all_checkpoints)[-1]
-        with open(PARAMETERS_PATH + latest_checkpoint, 'rb') as f:
-            print("loading", PARAMETERS_PATH + latest_checkpoint)
+        with open(TEMP_PATH + latest_checkpoint, 'rb') as f:
+            print("loading", TEMP_PATH + latest_checkpoint)
             self.prob = dill.load(f)
     
     def write_prediction(self, data, path = PREDICTIONS_PATH, output_type = "eval", iteration = 9): 
