@@ -13,7 +13,7 @@ PARAMETERS_PATH = "./models/IBM1/"
 PREDICTIONS_PATH = "./predictions/IBM1/"
 TEST_PATH = "./testing/eval/"
 PLOTS_PATH = "./plots/IBM1/"
-EXPERIMENT_NAME = "baseline"
+EXPERIMENT_NAME = "baseline_E_to_F"
 
 class IBM1:
     def __init__(self, source_train_path, target_train_path, source_eval_path, target_eval_path, source_test_path, target_test_path):
@@ -71,14 +71,15 @@ class IBM1:
         for sentence_idx, (s_sentence,t_sentence) in enumerate(data.generate_sentence_pairs()):
             alignments = self.viterbi_alignment(s_sentence, t_sentence)            
             for s_align, t_align in alignments:
-                if output_type == "eval":
-                    f.write("{} {} {} {} \n".format(sentence_idx+1, t_align+1, s_align, "S")) 
-                if output_type == "test":
-                    f.write("{} {} {} {} \n".format(self.add_back_zeros(sentence_idx+1), t_align+1, s_align, "S"))
+                if s_align != 0:
+                    if output_type == "eval":
+                        f.write("{} {} {} {} \n".format(sentence_idx+1, s_align, t_align+1, "S")) 
+                    if output_type == "test":
+                        f.write("{} {} {} {} \n".format(self.add_back_zeros(sentence_idx+1), s_align, t_align+1, "S"))
         f.close()
 
     def evaluate(self, iteration):
-        aer = test("./validation/dev.wa.nonullalign", PREDICTIONS_PATH + "eval_prediction_{}_{}.txt".format(EXPERIMENT_NAME, iteration))
+        aer = test("./validation/dev.wa.nonullalign", PREDICTIONS_PATH + "prediction_{}_{}.txt".format(EXPERIMENT_NAME, iteration))
         log_likelihood = 0
         for s_sentence,t_sentence in self.training_data.generate_sentence_pairs():
             log_likelihood += self.calculate_log_likelihood(s_sentence, t_sentence)
@@ -87,7 +88,6 @@ class IBM1:
         return aer, log_likelihood
 
     def test(self):
-        # write predictions for test set
         self.write_prediction(data = self.test_data, path = TEST_PATH, output_type = "test")
 
     def viterbi_alignment(self, source_sentence, target_sentence):
@@ -134,12 +134,12 @@ if __name__ == "__main__":
     french_eval_path = "./validation/dev.f"
     english_test_path = "./testing/test/test.e"
     french_test_path = "./testing/test/test.f"
-    ibm1 = IBM1(source_train_path = french_train_path,
-                target_train_path= english_train_path,
-                source_eval_path= french_eval_path,
-                target_eval_path = english_eval_path,
-                source_test_path = french_test_path,
-                target_test_path = english_test_path)
+    ibm1 = IBM1(source_train_path = english_train_path,
+                target_train_path= french_train_path,
+                source_eval_path= english_eval_path,
+                target_eval_path = french_eval_path,
+                source_test_path = english_test_path,
+                target_test_path = french_test_path)
     # ibm1.train()
     ibm1.load_checkpoint()
     ibm1.test()
