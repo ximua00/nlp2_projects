@@ -12,6 +12,7 @@ from aer import test
 PARAMETERS_PATH = "./models/IBM1/"
 PREDICTIONS_PATH = "./predictions/IBM1/"
 PLOTS_PATH = "./plots/IBM1/"
+EXPERIMENT_NAME = "lowercase"
 
 class IBM1:
     def __init__(self, source_train_path, target_train_path, source_eval_path, target_eval_path):
@@ -53,7 +54,7 @@ class IBM1:
 
     def save_checkpoint(self, iteration):
         model_path = self.training_data.source_data_path.split("/")[2]
-        with open(PARAMETERS_PATH + 'probs_{}_{}'.format(model_path, iteration) + '.pkl', 'wb') as f:
+        with open(PARAMETERS_PATH + 'probs_{}_{}_{}'.format(model_path, EXPERIMENT_NAME, iteration) + '.pkl', 'wb') as f:
             dill.dump(self.prob, f)
 
     def load_checkpoint(self):
@@ -63,7 +64,7 @@ class IBM1:
             self.prob = dill.load(f)
     
     def write_prediction(self, iteration = 9): 
-        f = open(PREDICTIONS_PATH + "eval_prediction_{}.txt".format(iteration), "w+")
+        f = open(PREDICTIONS_PATH + "eval_prediction_{}_{}.txt".format(EXPERIMENT_NAME, iteration), "w+")
         for sentence_idx, (s_sentence,t_sentence) in enumerate(self.evaluation_data.generate_sentence_pairs()):
             alignments = self.viterbi_alignment(s_sentence, t_sentence)            
             for s_align, t_align in alignments:
@@ -72,7 +73,7 @@ class IBM1:
         f.close()
 
     def evaluate(self, iteration):
-        aer = test("./validation/dev.wa.nonullalign", PREDICTIONS_PATH + "eval_prediction_{}.txt".format(iteration))
+        aer = test("./validation/dev.wa.nonullalign", PREDICTIONS_PATH + "eval_prediction_{}_{}.txt".format(EXPERIMENT_NAME, iteration))
         log_likelihood = 0
         for sentence_idx, (s_sentence,t_sentence) in enumerate(self.evaluation_data.generate_sentence_pairs()):
             log_likelihood += self.calculate_log_likelihood(s_sentence, t_sentence)
@@ -103,11 +104,11 @@ class IBM1:
     def plot_results(self, aers, log_likelihoods):
         plt.plot(aers, label = "AER")
         plt.legend()
-        plt.savefig(PLOTS_PATH + "AER.eps")
+        plt.savefig(PLOTS_PATH + EXPERIMENT_NAME + "AER.eps")
         plt.close()
         plt.plot(log_likelihoods, label = "log_likelihood")
         plt.legend()
-        plt.savefig(PLOTS_PATH + "log_likelihood.eps")
+        plt.savefig(PLOTS_PATH + EXPERIMENT_NAME + "log_likelihood.eps")
 
 
 if __name__ == "__main__":
